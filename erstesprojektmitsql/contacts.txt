@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Lernen",
+        "phone": "1222222"
+    },
+    {
+        "name": "Paul",
+        "phone": "1222222"
+    },
+    {
+        "name": "Wallisch",
+        "phone": "1222222"
+    },
+    {
+        "name": "Lena",
+        "phone": "456789"
+    },
+    {
+        "name": "Anna",
+        "phone": "4567"
+    },
+    {
+        "name": "Anna",
+        "phone": "234567"
+    }
+]
