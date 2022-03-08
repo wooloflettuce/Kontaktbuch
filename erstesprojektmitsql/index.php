@@ -309,14 +309,15 @@
         </div>
         <form action='?page=contacts' method='POST'>
         <div>
-            <input placeholder='Namen eingeben' name = 'name' required maxlength=255>
+            <input placeholder='Namen eingeben' name = 'name' pattern='[A-Za-z]{1,}[0-9]{0,10}' title='Namen dürfen nur mit Buchstaben beginnen' required maxlength=255>
         </div>
         <div>
-            <input placeholder='Telefonnummer eingeben' name='phone' required maxlength=15 pattern="[0-9]{15}|+">
+            <input placeholder='Telefonnummer eingeben' name='phone' required maxlength=15 pattern='[+]{0,1}[0-9]{9,15}' title='maximal 15 Zeichen, nur +-Zeichen und Zahlen möglich'>
         </div>
             <button type = 'Submit'>Absenden</button>
         </form>
         ";
+    
     }
 
     
