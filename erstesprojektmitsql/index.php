@@ -204,34 +204,21 @@
         die('Verbindung zur Datenbank fehlgeschlagen'.$con->connect_error);
     }
 
+
     //Name und Tel.nummer über POST einlesen, zu Datenbank hinzufügen
     if(isset($_POST['name'])&&isset($_POST['phone'])){
-        echo 'Kontakt <b>'. $_POST['name'] .'</b> wurde hinzugefügt';
         $name = $_POST['name'];
         $phone = $_POST['phone'];
         
-        $sql = "INSERT INTO user (Name, Telefonnummer) VALUES ('$name', '$phone')";
-        /*$sql2 = "SELECT * FROM user";
-        //Anfrage erneut
-        $res = $con->query($sql2);
-        */
-        
+        $sql = "INSERT INTO user (vorname, Telefonnummer) VALUES ('$name', '$phone')";
         //ob erfolgreich in Datenbank eingefügt wurde
-        if($con->query($sql)===TRUE){
-            echo'Kontakt erfolgreich in Datenbank eingefügt';
+        if($con->multi_query($sql)===TRUE){
+            echo 'Kontakt <b>'. $_POST['name'] .'</b> wurde hinzugefügt';
         }else{
-            echo 'Einfügen in Datenbank fehlgeschlagen';
+            echo 'Einfügen in Kontaktbuch fehlgeschlagen';
         }
-        /*
-        /wenn Tabelle mindestens einen Eintrag hat
-        if($res->num_rows > 0){
-            //Daten in assoziatives array, solange ausgeben, bis alles ausgegeben wurde
-            while($i = $res->fetch_assoc()){
-                echo "ID: " . $i["ID"] . "Name: " . $i["Name"] . "Telefonnummer" . $i["Telefonnummer"];
-            }
-        }
-        */
      }  
+     $con -> close();
 
      //headline je nach Seite ändern
     if($_GET['page'] == 'contacts'){
@@ -256,17 +243,21 @@
 
    //je nach Seite Inhalte ändern
     if($_GET['page'] == 'contacts'){
-        
-        $res = $con->query($sql2);
-        $sql2 = "SELECT * FROM user";
+        $con = new mysqli($servername, $user, $pw, $db);
+        if($con->connect_error){
+            die('Verbindung zur Datenbank fehlgeschlagen'.$con->connect_error);
+        }
+        //in alphabetischer Reihenfolge ausgeben
+        $sqlo = "SELECT ID, vorname, Telefonnummer FROM user ORDER BY vorname ASC";
+        $res = $con->query($sqlo);
         echo "
         <p>Auf dieser Seite hast du einen Überblick über deine <b>Kontakte</b></p>
         ";
         if($res->num_rows > 0){
             //Daten in assoziatives array, solange ausgeben, bis alles ausgegeben wurde
             while($i = $res->fetch_assoc()){
-             //Anfrage erneut
-            $name = $i["Name"]; 
+             //relevante Daten zwischenspeichern
+            $name = $i["vorname"]; 
             $phone = $i["Telefonnummer"]; 
             $id = $i["ID"];
             //erstelle 'Karte' für jeden Kontakt
@@ -286,6 +277,8 @@
             </div>";
         }
     }
+    $con -> close();
+
     }else if ($_GET['page'] == 'legal'){
         echo "
             Hier kommt das Impressum hin
@@ -293,22 +286,22 @@
     }else if ($_GET['page'] == 'start'){
         echo 'Du bist auf der Startseite!';
     }else if($_GET['page'] == 'deletecontact'){
-        echo '';
         $id = $_POST['index'];
-        //entsprechenden Kontakt aus contacts ausschneiden
-        unset($contacts[$key]);
-        //contacts.txt überschreiben
-        if(file_exists('contacts.txt')){
-        file_put_contents('contacts.txt', json_encode($contacts, JSON_PRETTY_PRINT));
-            }
+        $con = new mysqli($servername, $user, $pw, $db);
+        if($con->connect_error){
+            die('Verbindung zur Datenbank fehlgeschlagen'.$con->connect_error);
+        }
+        $sql3 = "DELETE FROM user WHERE ID='$id'";
+        $res = $con->query($sql3);
+        $con -> close();
 
-        echo "
-        Kontakt wurde gelöscht
+        echo '
+       
         <!--Button, um zurück zu den Kontakten zu kommen-->
-        <form action='?page=contacts' method='POST'>
-        <input class='back' type='submit' name='btn' value='Zurück zu deinen Kontakten'> 
+        <form action="?page=contacts" method="POST">
+        <input class="back" type="submit" name="btn" value="Zurück zu deinen Kontakten"> 
         </form>
-        ";
+        ';
     }else{
         echo "
         <div>
@@ -316,18 +309,17 @@
         </div>
         <form action='?page=contacts' method='POST'>
         <div>
-            <input placeholder='Namen eingeben' name = 'name'>
+            <input placeholder='Namen eingeben' name = 'name' required maxlength=255>
         </div>
         <div>
-            <input placeholder='Telefonnummer eingeben' name='phone'>
+            <input placeholder='Telefonnummer eingeben' name='phone' required maxlength=15 pattern="[0-9]{15}|+">
         </div>
             <button type = 'Submit'>Absenden</button>
         </form>
         ";
     }
 
-    $con -> close();
-
+    
     ?>
     </div>
 </div>
