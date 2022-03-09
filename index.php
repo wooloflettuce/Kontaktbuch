@@ -20,7 +20,6 @@
             background-color: pink; 
             color: white;
             text-align: center;
-            margin-top: 300px;
         }
         .main{
             display: flex;
@@ -31,6 +30,8 @@
             margin-right: 32px;
             padding-top: 10%;
             height: 100vh;
+            padding-bottom: 0%;
+            margin-bottom: 0%;
         }
 
         .menu a{
@@ -51,6 +52,7 @@
         }
 
         .content{
+            height: 130vh;
             width:80%;
             margin-top: 150px;
             margin-right: 32px;
@@ -101,7 +103,6 @@
             padding: 8px;
             padding-left: 64px;
             position: relative;
-            border-style: 5px red;
 
         }
         .profilepicture{
@@ -114,7 +115,8 @@
         }
 
         .phonebtn{
-            backgroundcolor: #999900;
+            border-style: none;
+            background-color: rgba(0, 0, 0, 0.05);
             padding: 4px;
             color: #746CF5;
             text-decoration: none;
@@ -130,7 +132,8 @@
         }
 
         .delete{
-            backgroundcolor: #999900;
+            border-style: none;
+            background-color: rgba(0, 0, 0, 0.05);
             padding: 4px;
             color: #746CF5;
             text-decoration: none;
@@ -138,7 +141,6 @@
             position: absolute;
             top: 47%;
             right: 0px;
-            border-style:none;
             font-family: 'Roboto Serif', sans-serif;
             font-size: 15px;
         }
@@ -166,12 +168,52 @@
 
         }
 
+        @media only screen and (max-width: 768px) {
+            [class="menu"] {
+            width: 40%;
+        }
+        [class="menu"] {
+            margin-top: 18%;
+        }
+
+        [class="menubar"] {
+            width:100%;
+            height: 20vh;
+
+        }
+        [class="myname"] {
+            margin-left:35px;
+        }
+
+        [class="card"] {
+            height: 20vh;
+        }
+        [class="content"] {
+            height: 100%;
+        }
+        [class="headline"] {
+            margin: 0%;
+            padding: 4%;    
+        }
+        [class="avatar"] {
+            margin-left: 30px;
+        }
+        [class="delete"] {
+            margin-right:115px;
+            margin-top: 40px;
+        }
+        [class="phonebtn"]{
+            margin-right:170px;
+            margin-top: 70px;
+        }
+    }
+
     </style>
 </head>
 
 <body>
     <div class="menubar">
-        <h1>My Contact Book</h1>
+        <h1 class="headline">My Contact Book</h1>
         <div class="myname">
             <div class="avatar">C</div>
             Carolin Wallisch
@@ -191,7 +233,7 @@
     </div>
     <div class="content">
     <?php
-    $headline = 'Herzlich Willkommen';
+    $headline = '';
     //Daten von Datenbank
     $servername = 'localhost';
     $user = 'root';
@@ -204,34 +246,25 @@
         die('Verbindung zur Datenbank fehlgeschlagen'.$con->connect_error);
     }
 
+
     //Name und Tel.nummer über POST einlesen, zu Datenbank hinzufügen
-    if(isset($_POST['name'])&&isset($_POST['phone'])){
-        echo 'Kontakt <b>'. $_POST['name'] .'</b> wurde hinzugefügt';
-        $name = $_POST['name'];
+    if(isset($_POST['vorname'])&&isset($_POST['phone'])&&isset($_POST['nachname'])){
+        //keine unnötigen Leerzeichen etc
+        $vorname = trim($_POST['vorname']);
+        $nachname = trim($_POST['nachname']);
         $phone = $_POST['phone'];
         
-        $sql = "INSERT INTO user (Name, Telefonnummer) VALUES ('$name', '$phone')";
-        /*$sql2 = "SELECT * FROM user";
-        //Anfrage erneut
-        $res = $con->query($sql2);
-        */
-        
+        $sql = "INSERT INTO user (vorname,nachname, Telefonnummer) VALUES ('$vorname', '$nachname', '$phone')";
         //ob erfolgreich in Datenbank eingefügt wurde
-        if($con->query($sql)===TRUE){
-            echo'Kontakt erfolgreich in Datenbank eingefügt';
+        if($con->multi_query($sql)===TRUE){
+            echo 'Kontakt <b>'. $_POST['vorname'] .' '.$_POST['nachname'].'</b> wurde hinzugefügt';
         }else{
-            echo 'Einfügen in Datenbank fehlgeschlagen';
+            echo 'Einfügen in Kontaktbuch fehlgeschlagen';
         }
-        /*
-        /wenn Tabelle mindestens einen Eintrag hat
-        if($res->num_rows > 0){
-            //Daten in assoziatives array, solange ausgeben, bis alles ausgegeben wurde
-            while($i = $res->fetch_assoc()){
-                echo "ID: " . $i["ID"] . "Name: " . $i["Name"] . "Telefonnummer" . $i["Telefonnummer"];
-            }
-        }
-        */
-     }  
+     }
+
+     
+     $con -> close();
 
      //headline je nach Seite ändern
     if($_GET['page'] == 'contacts'){
@@ -246,9 +279,6 @@
     if($_GET['page'] == 'addcontact'){
         $headline = 'Kontakt hinzufügen';
      }
-    if($_GET['page'] == 'deletecontact'){
-        $headline = 'Kontakt gelöscht';
-    }
 
     
     //Inhalt von page
@@ -256,25 +286,39 @@
 
    //je nach Seite Inhalte ändern
     if($_GET['page'] == 'contacts'){
-        
-        $res = $con->query($sql2);
-        $sql2 = "SELECT * FROM user";
+        $con = new mysqli($servername, $user, $pw, $db);
+        if($con->connect_error){
+            die('Verbindung zur Datenbank fehlgeschlagen'.$con->connect_error);
+        }
+        //in alphabetischer Reihenfolge ausgeben
+        $sqlo = "SELECT * FROM user ORDER BY vorname ASC";
+        $res = $con->query($sqlo);
         echo "
         <p>Auf dieser Seite hast du einen Überblick über deine <b>Kontakte</b></p>
         ";
         if($res->num_rows > 0){
             //Daten in assoziatives array, solange ausgeben, bis alles ausgegeben wurde
             while($i = $res->fetch_assoc()){
-             //Anfrage erneut
-            $name = $i["Name"]; 
+             //relevante Daten zwischenspeichern
+            $vorname = $i["vorname"];
+            $nachname = $i["nachname"];
             $phone = $i["Telefonnummer"]; 
             $id = $i["ID"];
-            //erstelle 'Karte' für jeden Kontakt
+            //
+            $first = substr($vorname,0,1);
+            $first = strtoupper($first);
+            $rest = substr($vorname,1);
+            $first2 = substr($nachname,0,1);
+            $first2 = strtoupper($first2);
+            $rest2 = substr($nachname,1);
+            $name = $first.$rest. ' '.$first2.$rest2;
+
+             //erstelle 'Karte' für jeden Kontakt
             echo "
             <div  class ='card'> 
             <img class='profilepicture' src = 'img/profile.svg'>  
-            <b>$name</b><br>
-               $phone
+            <b>$name</b><br><br>
+               $phone<br>
             <!-- Nummer ist wählbar über Klick-->
             <a class ='phonebtn' href='tel:$phone'>Anrufen</a>
             <!--Formular für Löschbutton, leitet zu einer Seite, wo Kontakt gelöscht wird-->
@@ -286,6 +330,8 @@
             </div>";
         }
     }
+    $con -> close();
+
     }else if ($_GET['page'] == 'legal'){
         echo "
             Hier kommt das Impressum hin
@@ -293,41 +339,51 @@
     }else if ($_GET['page'] == 'start'){
         echo 'Du bist auf der Startseite!';
     }else if($_GET['page'] == 'deletecontact'){
-        echo '';
+        //Möglichkeit1 File-Locking
+        if(!isset($_POST['index'])){
+            exit('Seite so nicht aufrufbar!');
+        }else{
         $id = $_POST['index'];
-        //entsprechenden Kontakt aus contacts ausschneiden
-        unset($contacts[$key]);
-        //contacts.txt überschreiben
-        if(file_exists('contacts.txt')){
-        file_put_contents('contacts.txt', json_encode($contacts, JSON_PRETTY_PRINT));
-            }
+        $con = new mysqli($servername, $user, $pw, $db);
+        if($con->connect_error){
+            die('Verbindung zur Datenbank fehlgeschlagen'.$con->connect_error);
+        }
+        $sql3 = "DELETE FROM user WHERE ID='$id'";
+        $res = $con->query($sql3);
+        $con -> close();
 
-        echo "
-        Kontakt wurde gelöscht
+        echo '
+        <h1>Kontakt gelöscht</h1>
         <!--Button, um zurück zu den Kontakten zu kommen-->
-        <form action='?page=contacts' method='POST'>
-        <input class='back' type='submit' name='btn' value='Zurück zu deinen Kontakten'> 
+        <form action="?page=contacts" method="POST">
+        <input class="back" type="submit" name="btn" value="Zurück zu deinen Kontakten"> 
         </form>
-        ";
-    }else{
+        ';
+
+    }
+    }else if($_GET['page'] == 'addcontact'){
+
         echo "
         <div>
             Hier kannst du neue Kontakte hinzufügen
         </div>
         <form action='?page=contacts' method='POST'>
         <div>
-            <input placeholder='Namen eingeben' name = 'name'>
+            <input placeholder='Vornamen eingeben' name = 'vorname' pattern='[A-Za-z]{1,}[0-9]{0,10}' title='Namen dürfen nur mit Buchstaben beginnen' required maxlength=255>
+            <input placeholder='Nachnamen eingeben' name = 'nachname' pattern='[A-Za-z]{1,}[0-9]{0,10}' title='Namen dürfen nur mit Buchstaben beginnen' required maxlength=255>
+
         </div>
         <div>
-            <input placeholder='Telefonnummer eingeben' name='phone'>
+            <input placeholder='Telefonnummer eingeben' name='phone' required maxlength=15 pattern='[+]{0,1}[0-9]{9,15}' title='maximal 15 Zeichen, nur +-Zeichen und Zahlen möglich'>
         </div>
             <button type = 'Submit'>Absenden</button>
         </form>
         ";
+    }else{
+        echo "Diese Seite existiert nicht";
     }
 
-    $con -> close();
-
+    
     ?>
     </div>
 </div>
