@@ -304,7 +304,7 @@
             $nachname = $i["nachname"];
             $phone = $i["Telefonnummer"]; 
             $id = $i["ID"];
-            //
+            //Vorname und Nachname zurechtschneiden
             $first = substr($vorname,0,1);
             $first = strtoupper($first);
             $rest = substr($vorname,1);
