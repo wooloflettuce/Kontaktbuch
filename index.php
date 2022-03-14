@@ -248,16 +248,16 @@
 
 
     //Name und Tel.nummer über POST einlesen, zu Datenbank hinzufügen
-    if(isset($_POST['vorname'])&&isset($_POST['phone'])&&isset($_POST['nachname'])){
+    if(isset($_POST['firstname'])&&isset($_POST['phone'])&&isset($_POST['lastname'])){
         //keine unnötigen Leerzeichen etc
-        $vorname = trim($_POST['vorname']);
-        $nachname = trim($_POST['nachname']);
+        $firstname = trim($_POST['firstname']);
+        $lastname = trim($_POST['lastname']);
         $phone = $_POST['phone'];
         
-        $sql = "INSERT INTO user (vorname,nachname, Telefonnummer) VALUES ('$vorname', '$nachname', '$phone')";
+        $sql = "INSERT INTO user (firstname,lastname, phone) VALUES ('$firstname', '$lastname', '$phone')";
         //ob erfolgreich in Datenbank eingefügt wurde
         if($con->multi_query($sql)===TRUE){
-            echo 'Kontakt <b>'. $_POST['vorname'] .' '.$_POST['nachname'].'</b> wurde hinzugefügt';
+            echo 'Kontakt <b>'. $_POST['firstname'] .' '.$_POST['lastname'].'</b> wurde hinzugefügt';
         }else{
             echo 'Einfügen in Kontaktbuch fehlgeschlagen';
         }
@@ -291,7 +291,7 @@
             die('Verbindung zur Datenbank fehlgeschlagen'.$con->connect_error);
         }
         //in alphabetischer Reihenfolge ausgeben
-        $sqlo = "SELECT * FROM user ORDER BY vorname ASC";
+        $sqlo = "SELECT * FROM user ORDER BY firstname ASC";
         $res = $con->query($sqlo);
         echo "
         <p>Auf dieser Seite hast du einen Überblick über deine <b>Kontakte</b></p>
@@ -300,17 +300,17 @@
             //Daten in assoziatives array, solange ausgeben, bis alles ausgegeben wurde
             while($i = $res->fetch_assoc()){
              //relevante Daten zwischenspeichern
-            $vorname = $i["vorname"];
-            $nachname = $i["nachname"];
-            $phone = $i["Telefonnummer"]; 
+            $firstname = $i["firstname"];
+            $lastname = $i["lastname"];
+            $phone = $i["phone"]; 
             $id = $i["ID"];
             //Vorname und Nachname zurechtschneiden
-            $first = substr($vorname,0,1);
+            $first = substr($firstname,0,1);
             $first = strtoupper($first);
-            $rest = substr($vorname,1);
-            $first2 = substr($nachname,0,1);
+            $rest = substr($firstname,1);
+            $first2 = substr($lastname,0,1);
             $first2 = strtoupper($first2);
-            $rest2 = substr($nachname,1);
+            $rest2 = substr($lastname,1);
             $name = $first.$rest. ' '.$first2.$rest2;
 
              //erstelle 'Karte' für jeden Kontakt
@@ -339,7 +339,7 @@
     }else if ($_GET['page'] == 'start'){
         echo 'Du bist auf der Startseite!';
     }else if($_GET['page'] == 'deletecontact'){
-        //Möglichkeit1 File-Locking
+        //Seite nur auffindbar, wenn gebraucht
         if(!isset($_POST['index'])){
             exit('Seite so nicht aufrufbar!');
         }else{
@@ -369,8 +369,8 @@
         </div>
         <form action='?page=contacts' method='POST'>
         <div>
-            <input placeholder='Vornamen eingeben' name = 'vorname' pattern='[A-Za-z]{1,}[0-9]{0,10}' title='Namen dürfen nur mit Buchstaben beginnen' required maxlength=255>
-            <input placeholder='Nachnamen eingeben' name = 'nachname' pattern='[A-Za-z]{1,}[0-9]{0,10}' title='Namen dürfen nur mit Buchstaben beginnen' required maxlength=255>
+            <input placeholder='Vornamen eingeben' name = 'firstname' pattern='[A-Za-z]{1,}[0-9]{0,10}' title='Namen dürfen nur mit Buchstaben beginnen' required maxlength=255>
+            <input placeholder='Nachnamen eingeben' name = 'lastname' pattern='[A-Za-z]{1,}[0-9]{0,10}' title='Namen dürfen nur mit Buchstaben beginnen' required maxlength=255>
 
         </div>
         <div>
